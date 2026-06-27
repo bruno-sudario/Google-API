@@ -1,0 +1,22 @@
+# Dependências
+node_modules
+dist
+dist-ssr
+
+# Build info do TypeScript
+*.tsbuildinfo
+
+# Variáveis de ambiente (a chave da API NUNCA deve ser versionada)
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
+
+# Editores / SO
+.DS_Store
+.vscode/*
+!.vscode/extensions.json
+.idea
