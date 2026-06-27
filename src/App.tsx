@@ -2,37 +2,18 @@ import { useState } from 'react';
 import { APIProvider } from '@vis.gl/react-google-maps';
 import { MapPin } from 'lucide-react';
 import FormularioBusca from './components/FormularioBusca';
-import { buscarFornecedores, type AreaBusca } from './lib/buscaEngine';
+import BarraProgresso from './components/BarraProgresso';
+import { useBuscaFornecedores } from './hooks/useBuscaFornecedores';
+import type { AreaBusca } from './lib/buscaEngine';
 
 const API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY ?? '';
 
 export default function App() {
-  const [buscando, setBuscando] = useState(false);
   const [incluirRevisar, setIncluirRevisar] = useState(false);
+  const busca = useBuscaFornecedores();
 
-  // Handler temporário (M2): roda a busca e loga as contagens no console.
-  const handleBuscar = async (
-    catIds: string[],
-    area: AreaBusca,
-    rotuloArea: string,
-  ) => {
-    setBuscando(true);
-    console.log(`[busca] área: ${rotuloArea}`, area, 'categorias:', catIds);
-    try {
-      for (const catId of catIds) {
-        const r = await buscarFornecedores(
-          catId,
-          area,
-          (msg, pct) => console.log(`[${catId}] ${pct}% — ${msg}`),
-          incluirRevisar,
-        );
-        console.log(`[${catId}] resumo:`, r.resumo);
-      }
-    } catch (e) {
-      console.error('[busca] erro:', e);
-    } finally {
-      setBuscando(false);
-    }
+  const handleBuscar = (catIds: string[], area: AreaBusca) => {
+    busca.executar(catIds, area, incluirRevisar);
   };
 
   return (
@@ -61,11 +42,21 @@ export default function App() {
           )}
 
           <FormularioBusca
-            buscando={buscando}
+            buscando={busca.buscando}
             incluirRevisar={incluirRevisar}
             onIncluirRevisarChange={setIncluirRevisar}
             onBuscar={handleBuscar}
           />
+
+          {busca.buscando && (
+            <BarraProgresso msg={busca.progresso.msg} pct={busca.progresso.pct} />
+          )}
+
+          {busca.erro && (
+            <div className="rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-700">
+              {busca.erro}
+            </div>
+          )}
         </main>
       </div>
     </APIProvider>
