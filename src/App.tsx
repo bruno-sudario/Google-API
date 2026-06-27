@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { APIProvider } from '@vis.gl/react-google-maps';
 import { MapPin } from 'lucide-react';
 import FormularioBusca from './components/FormularioBusca';
@@ -6,17 +6,36 @@ import BarraProgresso from './components/BarraProgresso';
 import PainelResultados from './components/PainelResultados';
 import { useBuscaFornecedores } from './hooks/useBuscaFornecedores';
 import { exportarXlsx } from './lib/exportarXlsx';
-import type { AreaBusca } from './lib/buscaEngine';
+import type { AreaBusca, Fornecedor } from './lib/buscaEngine';
 
 const API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY ?? '';
 
 export default function App() {
   const [incluirRevisar, setIncluirRevisar] = useState(false);
+  const [minNota, setMinNota] = useState(0);
+  const [minAvaliacoes, setMinAvaliacoes] = useState(0);
   const busca = useBuscaFornecedores();
 
   const handleBuscar = (catIds: string[], area: AreaBusca) => {
     busca.executar(catIds, area, incluirRevisar);
   };
+
+  // Filtros aplicados ao vivo (nota/avaliações vêm do enriquecimento).
+  // Lead sem nota/avaliações é tratado como 0 → não passa em filtro > 0.
+  const filtrar = (lista: Fornecedor[]) =>
+    lista.filter(
+      (f) =>
+        (f.nota ?? 0) >= minNota && (f.totalAvaliacoes ?? 0) >= minAvaliacoes,
+    );
+
+  const aprovadosFiltrados = useMemo(
+    () => filtrar(busca.aprovados),
+    [busca.aprovados, minNota, minAvaliacoes],
+  );
+  const revisarFiltrados = useMemo(
+    () => filtrar(busca.revisar),
+    [busca.revisar, minNota, minAvaliacoes],
+  );
 
   return (
     <APIProvider apiKey={API_KEY} libraries={['places', 'geocoding']}>
@@ -62,14 +81,17 @@ export default function App() {
 
           {busca.concluido && (
             <PainelResultados
-              aprovados={busca.aprovados}
-              revisar={busca.revisar}
+              aprovados={aprovadosFiltrados}
+              revisar={revisarFiltrados}
               descartados={busca.descartados}
-              resumo={busca.resumo}
+              minNota={minNota}
+              minAvaliacoes={minAvaliacoes}
+              onMinNotaChange={setMinNota}
+              onMinAvaliacoesChange={setMinAvaliacoes}
               onPromover={busca.promover}
               onRemover={busca.remover}
               onExportar={() =>
-                exportarXlsx(busca.aprovados, busca.revisar, incluirRevisar)
+                exportarXlsx(aprovadosFiltrados, revisarFiltrados, incluirRevisar)
               }
             />
           )}
