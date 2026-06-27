@@ -1,6 +1,11 @@
 import { useState } from 'react';
 import { Download, SlidersHorizontal } from 'lucide-react';
 import type { Fornecedor } from '../lib/buscaEngine';
+import {
+  OPCOES_NOTA,
+  OPCOES_AVALIACOES,
+  CLASSE_SELECT_FILTRO,
+} from '../lib/filtros';
 import TabelaFornecedores from './TabelaFornecedores';
 
 type Aba = 'aprovados' | 'revisar' | 'descartados';
@@ -17,23 +22,6 @@ interface Props {
   onRemover: (placeId: string) => void;
   onExportar: () => void;
 }
-
-const OPCOES_NOTA = [
-  { valor: 0, rotulo: 'Qualquer nota' },
-  { valor: 3, rotulo: '3,0+' },
-  { valor: 3.5, rotulo: '3,5+' },
-  { valor: 4, rotulo: '4,0+' },
-  { valor: 4.5, rotulo: '4,5+' },
-];
-
-const OPCOES_AVALIACOES = [
-  { valor: 0, rotulo: 'Qualquer' },
-  { valor: 1, rotulo: '1+' },
-  { valor: 5, rotulo: '5+' },
-  { valor: 10, rotulo: '10+' },
-  { valor: 25, rotulo: '25+' },
-  { valor: 50, rotulo: '50+' },
-];
 
 export default function PainelResultados({
   aprovados,
@@ -56,9 +44,6 @@ export default function PainelResultados({
     { id: 'revisar', rotulo: 'Para revisar', n: revisar.length },
     { id: 'descartados', rotulo: 'Descartados', n: descartados.length },
   ];
-
-  const classeSelect =
-    'rounded-lg border border-slate-300 bg-white py-1.5 pl-2 pr-7 text-sm outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900';
 
   return (
     <section className="rounded-xl border border-slate-200 bg-white shadow-sm">
@@ -95,7 +80,7 @@ export default function PainelResultados({
             <select
               value={minNota}
               onChange={(e) => onMinNotaChange(Number(e.target.value))}
-              className={classeSelect}
+              className={CLASSE_SELECT_FILTRO}
             >
               {OPCOES_NOTA.map((o) => (
                 <option key={o.valor} value={o.valor}>
@@ -109,7 +94,7 @@ export default function PainelResultados({
             <select
               value={minAvaliacoes}
               onChange={(e) => onMinAvaliacoesChange(Number(e.target.value))}
-              className={classeSelect}
+              className={CLASSE_SELECT_FILTRO}
             >
               {OPCOES_AVALIACOES.map((o) => (
                 <option key={o.valor} value={o.valor}>

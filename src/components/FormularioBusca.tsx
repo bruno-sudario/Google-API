@@ -2,12 +2,21 @@ import { useState } from 'react';
 import { useMapsLibrary } from '@vis.gl/react-google-maps';
 import { Search, MapPin, Loader2 } from 'lucide-react';
 import { CATEGORIAS, type AreaBusca } from '../lib/buscaEngine';
+import {
+  OPCOES_NOTA,
+  OPCOES_AVALIACOES,
+  CLASSE_SELECT_FILTRO,
+} from '../lib/filtros';
 import { useGeocode } from '../hooks/useGeocode';
 
 interface Props {
   buscando: boolean;
   incluirRevisar: boolean;
   onIncluirRevisarChange: (v: boolean) => void;
+  minNota: number;
+  minAvaliacoes: number;
+  onMinNotaChange: (v: number) => void;
+  onMinAvaliacoesChange: (v: number) => void;
   onBuscar: (catIds: string[], area: AreaBusca, rotuloArea: string) => void;
 }
 
@@ -15,6 +24,10 @@ export default function FormularioBusca({
   buscando,
   incluirRevisar,
   onIncluirRevisarChange,
+  minNota,
+  minAvaliacoes,
+  onMinNotaChange,
+  onMinAvaliacoesChange,
   onBuscar,
 }: Props) {
   const placesLib = useMapsLibrary('places');
@@ -134,6 +147,46 @@ export default function FormularioBusca({
             );
           })}
         </div>
+      </div>
+
+      {/* Filtros de qualidade (aplicados aos resultados) */}
+      <div className="mt-5">
+        <span className="mb-2 block text-sm font-medium text-slate-700">
+          Filtros de qualidade
+        </span>
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+          <label className="flex items-center gap-2 text-sm text-slate-600">
+            Pontuação mínima
+            <select
+              value={minNota}
+              onChange={(e) => onMinNotaChange(Number(e.target.value))}
+              className={CLASSE_SELECT_FILTRO}
+            >
+              {OPCOES_NOTA.map((o) => (
+                <option key={o.valor} value={o.valor}>
+                  {o.rotulo}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="flex items-center gap-2 text-sm text-slate-600">
+            Avaliações mínimas
+            <select
+              value={minAvaliacoes}
+              onChange={(e) => onMinAvaliacoesChange(Number(e.target.value))}
+              className={CLASSE_SELECT_FILTRO}
+            >
+              {OPCOES_AVALIACOES.map((o) => (
+                <option key={o.valor} value={o.valor}>
+                  {o.rotulo}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+        <p className="mt-1.5 text-xs text-slate-400">
+          Filtram os resultados por nota e nº de avaliações (não alteram a busca).
+        </p>
       </div>
 
       {/* Ações */}

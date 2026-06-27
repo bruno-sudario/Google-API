@@ -66,6 +66,10 @@ export default function App() {
             buscando={busca.buscando}
             incluirRevisar={incluirRevisar}
             onIncluirRevisarChange={setIncluirRevisar}
+            minNota={minNota}
+            minAvaliacoes={minAvaliacoes}
+            onMinNotaChange={setMinNota}
+            onMinAvaliacoesChange={setMinAvaliacoes}
             onBuscar={handleBuscar}
           />
 
