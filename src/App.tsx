@@ -5,6 +5,7 @@ import FormularioBusca from './components/FormularioBusca';
 import BarraProgresso from './components/BarraProgresso';
 import PainelResultados from './components/PainelResultados';
 import { useBuscaFornecedores } from './hooks/useBuscaFornecedores';
+import { exportarXlsx } from './lib/exportarXlsx';
 import type { AreaBusca } from './lib/buscaEngine';
 
 const API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY ?? '';
@@ -67,9 +68,9 @@ export default function App() {
               resumo={busca.resumo}
               onPromover={busca.promover}
               onRemover={busca.remover}
-              onExportar={() => {
-                /* M5: exportação XLSX */
-              }}
+              onExportar={() =>
+                exportarXlsx(busca.aprovados, busca.revisar, incluirRevisar)
+              }
             />
           )}
         </main>
