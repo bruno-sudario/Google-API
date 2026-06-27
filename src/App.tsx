@@ -3,6 +3,7 @@ import { APIProvider } from '@vis.gl/react-google-maps';
 import { MapPin } from 'lucide-react';
 import FormularioBusca from './components/FormularioBusca';
 import BarraProgresso from './components/BarraProgresso';
+import PainelResultados from './components/PainelResultados';
 import { useBuscaFornecedores } from './hooks/useBuscaFornecedores';
 import type { AreaBusca } from './lib/buscaEngine';
 
@@ -56,6 +57,20 @@ export default function App() {
             <div className="rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-700">
               {busca.erro}
             </div>
+          )}
+
+          {busca.concluido && (
+            <PainelResultados
+              aprovados={busca.aprovados}
+              revisar={busca.revisar}
+              descartados={busca.descartados}
+              resumo={busca.resumo}
+              onPromover={busca.promover}
+              onRemover={busca.remover}
+              onExportar={() => {
+                /* M5: exportação XLSX */
+              }}
+            />
           )}
         </main>
       </div>
