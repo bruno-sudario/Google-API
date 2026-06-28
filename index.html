@@ -3,10 +3,19 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Evita servir um index.html em cache apontando para assets já removidos
+         após um novo deploy (que causaria tela branca por 404 do bundle). -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
     <title>Busca Geo Avançada</title>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <div style="font-family: system-ui, sans-serif; padding: 24px; color: #475569">
+        Carregando aplicação…
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
