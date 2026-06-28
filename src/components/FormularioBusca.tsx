@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useMapsLibrary } from '@vis.gl/react-google-maps';
 import { Search, MapPin, Loader2 } from 'lucide-react';
-import { CATEGORIAS, type AreaBusca } from '../lib/buscaEngine';
+import type { AreaBusca } from '../lib/buscaEngine';
 import {
   OPCOES_NOTA,
   OPCOES_AVALIACOES,
@@ -17,7 +17,7 @@ interface Props {
   minAvaliacoes: number;
   onMinNotaChange: (v: number) => void;
   onMinAvaliacoesChange: (v: number) => void;
-  onBuscar: (catIds: string[], area: AreaBusca, rotuloArea: string) => void;
+  onBuscar: (termo: string, area: AreaBusca, rotuloArea: string) => void;
 }
 
 export default function FormularioBusca({
@@ -33,9 +33,9 @@ export default function FormularioBusca({
   const placesLib = useMapsLibrary('places');
   const { geocodificar, pronto: geocodePronto } = useGeocode();
 
-  const [local, setLocal] = useState('');
-  const [raioKm, setRaioKm] = useState(15);
-  const [selecionadas, setSelecionadas] = useState<string[]>(['moveis']);
+  const [local, setLocal] = useState('Sorocaba, SP');
+  const [termo, setTermo] = useState('');
+  const [raioKm, setRaioKm] = useState(100);
   const [erro, setErro] = useState<string | null>(null);
   const [geocodificando, setGeocodificando] = useState(false);
 
@@ -45,13 +45,7 @@ export default function FormularioBusca({
     !buscando &&
     !geocodificando &&
     local.trim().length > 0 &&
-    selecionadas.length > 0;
-
-  const alternarCategoria = (id: string) => {
-    setSelecionadas((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
-    );
-  };
+    termo.trim().length > 0;
 
   const submeter = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -70,7 +64,7 @@ export default function FormularioBusca({
       centro: { lat: r.lat, lng: r.lng },
       raioKm,
     };
-    onBuscar(selecionadas, area, r.enderecoFormatado);
+    onBuscar(termo, area, r.enderecoFormatado);
   };
 
   return (
@@ -79,6 +73,26 @@ export default function FormularioBusca({
       className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm"
     >
       <div className="grid gap-5 md:grid-cols-2">
+        {/* O que buscar */}
+        <div>
+          <label className="mb-1 block text-sm font-medium text-slate-700">
+            O que buscar
+          </label>
+          <div className="relative">
+            <Search
+              size={16}
+              className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+            />
+            <input
+              type="text"
+              value={termo}
+              onChange={(e) => setTermo(e.target.value)}
+              placeholder="Ex.: marmoraria, vidraçaria, móveis planejados…"
+              className="w-full rounded-lg border border-slate-300 py-2 pl-9 pr-3 text-sm outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900"
+            />
+          </div>
+        </div>
+
         {/* Local */}
         <div>
           <label className="mb-1 block text-sm font-medium text-slate-700">
@@ -98,54 +112,24 @@ export default function FormularioBusca({
             />
           </div>
         </div>
-
-        {/* Raio */}
-        <div>
-          <label className="mb-1 block text-sm font-medium text-slate-700">
-            Raio de busca: <span className="font-semibold">{raioKm} km</span>
-          </label>
-          <input
-            type="range"
-            min={1}
-            max={30}
-            value={raioKm}
-            onChange={(e) => setRaioKm(Number(e.target.value))}
-            className="mt-3 w-full accent-slate-900"
-          />
-          <div className="flex justify-between text-xs text-slate-400">
-            <span>1 km</span>
-            <span>30 km</span>
-          </div>
-        </div>
       </div>
 
-      {/* Categorias */}
+      {/* Raio */}
       <div className="mt-5">
-        <span className="mb-2 block text-sm font-medium text-slate-700">
-          Categorias
-        </span>
-        <div className="flex flex-wrap gap-2">
-          {CATEGORIAS.map((c) => {
-            const ativa = selecionadas.includes(c.id);
-            return (
-              <label
-                key={c.id}
-                className={`cursor-pointer select-none rounded-full border px-3 py-1.5 text-sm transition ${
-                  ativa
-                    ? 'border-slate-900 bg-slate-900 text-white'
-                    : 'border-slate-300 bg-white text-slate-600 hover:border-slate-400'
-                }`}
-              >
-                <input
-                  type="checkbox"
-                  className="sr-only"
-                  checked={ativa}
-                  onChange={() => alternarCategoria(c.id)}
-                />
-                {c.rotulo}
-              </label>
-            );
-          })}
+        <label className="mb-1 block text-sm font-medium text-slate-700">
+          Raio de busca: <span className="font-semibold">{raioKm} km</span>
+        </label>
+        <input
+          type="range"
+          min={1}
+          max={200}
+          value={raioKm}
+          onChange={(e) => setRaioKm(Number(e.target.value))}
+          className="mt-3 w-full accent-slate-900"
+        />
+        <div className="flex justify-between text-xs text-slate-400">
+          <span>1 km</span>
+          <span>200 km</span>
         </div>
       </div>
 

@@ -1,6 +1,6 @@
 import { useReducer, useCallback } from 'react';
 import {
-  buscarFornecedores,
+  buscarPorTexto,
   type AreaBusca,
   type Fornecedor,
 } from '../lib/buscaEngine';
@@ -115,50 +115,23 @@ export function useBuscaFornecedores() {
   const [estado, dispatch] = useReducer(reducer, ESTADO_INICIAL);
 
   const executar = useCallback(
-    async (catIds: string[], area: AreaBusca, incluirRevisar: boolean) => {
-      if (catIds.length === 0) return;
+    async (termo: string, area: AreaBusca, incluirRevisar: boolean) => {
+      if (!termo.trim()) return;
       dispatch({ tipo: 'INICIAR' });
 
-      // Acumuladores com dedup GLOBAL por placeId (entre categorias).
-      const aprovados: Fornecedor[] = [];
-      const revisar: Fornecedor[] = [];
-      const descartados: Fornecedor[] = [];
-      const vistos = new Set<string>();
-
-      const total = catIds.length;
-
       try {
-        for (let i = 0; i < total; i++) {
-          const catId = catIds[i];
-          const resultado = await buscarFornecedores(
-            catId,
-            area,
-            (msg, pct) => {
-              // Progresso combinado: fatia desta categoria dentro do total.
-              const combinado = Math.round((i * 100 + pct) / total);
-              dispatch({ tipo: 'PROGRESSO', progresso: { msg, pct: combinado } });
-            },
-            incluirRevisar,
-          );
-
-          for (const f of resultado.aprovados) {
-            if (vistos.has(f.placeId)) continue;
-            vistos.add(f.placeId);
-            aprovados.push(f);
-          }
-          for (const f of resultado.revisar) {
-            if (vistos.has(f.placeId)) continue;
-            vistos.add(f.placeId);
-            revisar.push(f);
-          }
-          for (const f of resultado.descartados) {
-            if (vistos.has(f.placeId)) continue;
-            vistos.add(f.placeId);
-            descartados.push(f);
-          }
-        }
-
-        dispatch({ tipo: 'CONCLUIR', aprovados, revisar, descartados });
+        const resultado = await buscarPorTexto(
+          termo,
+          area,
+          (msg, pct) => dispatch({ tipo: 'PROGRESSO', progresso: { msg, pct } }),
+          incluirRevisar,
+        );
+        dispatch({
+          tipo: 'CONCLUIR',
+          aprovados: resultado.aprovados,
+          revisar: resultado.revisar,
+          descartados: resultado.descartados,
+        });
       } catch (e) {
         dispatch({
           tipo: 'ERRO',

@@ -416,8 +416,54 @@ function mapearDescoberta(
 // Busca de UMA categoria
 // ---------------------------------------------------------------------------
 
+/** Palavras significativas de um termo livre (para a whitelist por nome). */
+const STOPWORDS = new Set([
+  'de', 'da', 'do', 'das', 'dos', 'e', 'em', 'para', 'pra', 'com', 'a', 'o',
+  'os', 'as', 'no', 'na', 'nos', 'nas', 'um', 'uma',
+]);
+function palavrasDoTermo(termo: string): string[] {
+  return Array.from(
+    new Set(
+      normalizar(termo)
+        .split(' ')
+        .filter((w) => w.length >= 3 && !STOPWORDS.has(w)),
+    ),
+  );
+}
+
+/** Busca por categoria pré-configurada (mantida para compatibilidade). */
 export async function buscarFornecedores(
   catId: string,
+  area: AreaBusca,
+  onProgresso?: OnProgresso,
+  incluirRevisar = false,
+): Promise<ResultadoBusca> {
+  const cat = CATEGORIAS.find((c) => c.id === catId);
+  if (!cat) throw new Error(`Categoria desconhecida: ${catId}`);
+  return buscarComConfig(cat, area, onProgresso, incluirRevisar);
+}
+
+/** Busca por texto livre digitado pelo usuário. */
+export async function buscarPorTexto(
+  termo: string,
+  area: AreaBusca,
+  onProgresso?: OnProgresso,
+  incluirRevisar = false,
+): Promise<ResultadoBusca> {
+  const t = termo.trim();
+  const cat: CategoriaConfig = {
+    id: '_livre',
+    rotulo: t || 'Busca',
+    tiposPrimarios: [],
+    palavrasObrigatorias: palavrasDoTermo(t),
+    palavrasBloqueadas: [],
+    consultasTexto: [t],
+  };
+  return buscarComConfig(cat, area, onProgresso, incluirRevisar);
+}
+
+async function buscarComConfig(
+  cat: CategoriaConfig,
   area: AreaBusca,
   onProgresso?: OnProgresso,
   incluirRevisar = false,
@@ -426,9 +472,6 @@ export async function buscarFornecedores(
 
   emit('Carregando biblioteca de lugares…', 0);
   const { Place } = await google.maps.importLibrary('places');
-
-  const cat = CATEGORIAS.find((c) => c.id === catId);
-  if (!cat) throw new Error(`Categoria desconhecida: ${catId}`);
 
   // ---- Fase 1: descoberta (campos baratos) ----
   const vistos = new Map<string, google.maps.places.Place>();

@@ -4,6 +4,7 @@ import { MapPin } from 'lucide-react';
 import FormularioBusca from './components/FormularioBusca';
 import BarraProgresso from './components/BarraProgresso';
 import PainelResultados from './components/PainelResultados';
+import MapaResultados from './components/MapaResultados';
 import { useBuscaFornecedores } from './hooks/useBuscaFornecedores';
 import { exportarXlsx } from './lib/exportarXlsx';
 import type { AreaBusca, Fornecedor } from './lib/buscaEngine';
@@ -12,12 +13,14 @@ const API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY ?? '';
 
 export default function App() {
   const [incluirRevisar, setIncluirRevisar] = useState(false);
-  const [minNota, setMinNota] = useState(0);
-  const [minAvaliacoes, setMinAvaliacoes] = useState(0);
+  const [minNota, setMinNota] = useState(4.5);
+  const [minAvaliacoes, setMinAvaliacoes] = useState(100);
+  const [ultimaArea, setUltimaArea] = useState<AreaBusca | null>(null);
   const busca = useBuscaFornecedores();
 
-  const handleBuscar = (catIds: string[], area: AreaBusca) => {
-    busca.executar(catIds, area, incluirRevisar);
+  const handleBuscar = (termo: string, area: AreaBusca) => {
+    setUltimaArea(area);
+    busca.executar(termo, area, incluirRevisar);
   };
 
   // Filtros aplicados ao vivo (nota/avaliações vêm do enriquecimento).
@@ -48,7 +51,7 @@ export default function App() {
             <div>
               <h1 className="text-lg font-semibold leading-tight">Busca Geo Avançada</h1>
               <p className="text-sm text-slate-500">
-                Prospecção de fornecedores por categoria e raio
+                Prospecção de fornecedores por termo e raio
               </p>
             </div>
           </div>
@@ -97,6 +100,14 @@ export default function App() {
               onExportar={() =>
                 exportarXlsx(aprovadosFiltrados, revisarFiltrados, incluirRevisar)
               }
+            />
+          )}
+
+          {busca.concluido && ultimaArea && (
+            <MapaResultados
+              centro={ultimaArea.centro}
+              raioKm={ultimaArea.raioKm}
+              locais={aprovadosFiltrados}
             />
           )}
         </main>

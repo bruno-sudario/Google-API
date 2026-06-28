@@ -12,32 +12,10 @@
   </head>
   <body>
     <div id="root">
-      <div id="fallback" style="font-family: system-ui, sans-serif; padding: 24px; color: #475569">
+      <div style="font-family: system-ui, sans-serif; padding: 24px; color: #475569">
         Carregando aplicação…
       </div>
     </div>
-    <!-- Diagnóstico: se algo falhar ao carregar/rodar o JS, mostra o erro na
-         tela em vez de deixar a página em branco. -->
-    <script>
-      (function () {
-        function mostrar(titulo, detalhe) {
-          var r = document.getElementById('root');
-          if (!r) return;
-          r.innerHTML =
-            '<div style="font-family: system-ui, sans-serif; padding: 24px; color: #b91c1c">' +
-            '<strong>' + titulo + '</strong>' +
-            '<pre style="white-space: pre-wrap; word-break: break-word; margin-top: 8px; color: #7f1d1d; font: 12px monospace">' +
-            String(detalhe || '').replace(/</g, '&lt;') +
-            '</pre></div>';
-        }
-        window.addEventListener('error', function (e) {
-          mostrar('Erro ao carregar', (e.message || e.error || '') + '\n' + (e.filename || '') + ':' + (e.lineno || ''));
-        });
-        window.addEventListener('unhandledrejection', function (e) {
-          mostrar('Erro (promessa)', (e.reason && (e.reason.stack || e.reason.message)) || e.reason || '');
-        });
-      })();
-    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

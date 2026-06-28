@@ -14,12 +14,11 @@ export const OPCOES_NOTA: OpcaoFiltro[] = [
 ];
 
 export const OPCOES_AVALIACOES: OpcaoFiltro[] = [
-  { valor: 0, rotulo: 'Qualquer' },
-  { valor: 1, rotulo: '1+' },
-  { valor: 5, rotulo: '5+' },
-  { valor: 10, rotulo: '10+' },
   { valor: 25, rotulo: '25+' },
   { valor: 50, rotulo: '50+' },
+  { valor: 100, rotulo: '100+' },
+  { valor: 200, rotulo: '200+' },
+  { valor: 500, rotulo: '500+' },
 ];
 
 /** Classe Tailwind reutilizada pelos <select> de filtro. */
